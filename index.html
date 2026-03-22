@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NEXUS Store — Premium Digital Marketplace</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="notifications.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+
+<!-- NOTIFICATION CONTAINER -->
+<div id="notification-container"></div>
+
+<!-- NAVBAR -->
+<header class="navbar" id="navbar">
+  <div class="nav-brand">
+    <span class="brand-icon">🛍️</span>
+   
+    <span class="brand-name">QUICK SHOP</span>
+  </div>
+  <nav class="nav-links">
+    <a href="#" class="nav-link active" data-page="store">Store</a>
+    <a href="#" class="nav-link" data-page="tracking">Track Order</a>
+    <a href="#" class="nav-link" data-page="admin">Admin</a>
+  </nav>
+  <div class="nav-actions">
+    <button class="icon-btn" id="notif-btn" title="Notifications">
+      <i class="fas fa-bell"></i>
+      <span class="badge" id="notif-badge">3</span>
+    </button>
+    <button class="icon-btn cart-btn" id="cart-toggle" title="Cart">
+      <i class="fas fa-shopping-bag"></i>
+      <span class="badge" id="cart-count">0</span>
+    </button>
+  </div>
+</header>
+
+<!-- NOTIFICATION PANEL -->
+<div class="notif-panel" id="notif-panel">
+  <div class="notif-header">
+    <h3>Notifications</h3>
+    <button onclick="clearNotifications()" class="clear-btn">Clear All</button>
+  </div>
+  <div class="notif-list" id="notif-list"></div>
+</div>
+
+<!-- CART SIDEBAR -->
+<div class="cart-overlay" id="cart-overlay"></div>
+<aside class="cart-sidebar" id="cart-sidebar">
+  <div class="cart-header">
+    <h2>Your Cart</h2>
+    <button class="close-cart" id="close-cart"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="cart-items" id="cart-items"></div>
+  <div class="cart-footer">
+    <div class="cart-total">
+      <span>Total</span>
+      <span id="cart-total-price">₹0.00</span>
+    </div>
+    <button class="btn-primary checkout-btn" onclick="checkout()">
+      <i class="fas fa-lock"></i> Checkout
+    </button>
+    <button class="btn-secondary" onclick="downloadCart()">
+      <i class="fas fa-download"></i> Download Cart Details
+    </button>
+  </div>
+</aside>
+
+<!-- ===== STORE PAGE ===== -->
+<main class="page active" id="page-store">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">🛒 New Collection </div>
+      <h1 class="hero-title">Discover<br><em>Premium</em><br>Products</h1>
+      <p class="hero-sub">Curated marketplace for exceptional goods</p>
+      <div class="hero-search">
+        <i class="fas fa-search"></i>
+        <input type="text" id="search-input" placeholder="Search products..." oninput="filterProducts()"/>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="floating-card fc1">
+        <span class="fc-icon">📦</span>
+        <span>Fast Delivery</span>
+      </div>
+      <div class="floating-card fc2">
+        <span class="fc-icon">⭐</span>
+        <span>Top Rated</span>
+      </div>
+      <div class="floating-card fc3">
+        <span class="fc-icon">🔒</span>
+        <span>Secure Pay</span>
+      </div>
+      <div class="hero-blob"></div>
+    </div>
+  </section>
+
+  <!-- CATEGORIES -->
+  <section class="categories-section">
+    <div class="section-header">
+      <h2>Categories</h2>
+    </div>
+    <div class="categories-row" id="categories-row"></div>
+  </section>
+
+  <!-- PRODUCTS -->
+  <section class="products-section">
+    <div class="section-header">
+      <h2>All Products</h2>
+      <div class="sort-bar">
+        <select id="sort-select" onchange="filterProducts()">
+          <option value="default">Sort By</option>
+          <option value="price-asc">Price: Low → High</option>
+          <option value="price-desc">Price: High → Low</option>
+          <option value="name">Name A-Z</option>
+        </select>
+      </div>
+    </div>
+    <div class="products-grid" id="products-grid"></div>
+  </section>
+
+</main>
+
+<!-- ===== TRACKING PAGE ===== -->
+<main class="page" id="page-tracking">
+  <section class="tracking-section">
+    <div class="tracking-header">
+      <h1>Track Your Order</h1>
+      <p>Enter your order ID to see real-time delivery updates</p>
+    </div>
+    <div class="track-input-row">
+      <input type="text" id="track-order-id" placeholder="Enter Order ID (e.g. ORD-1001)" class="track-input"/>
+      <button class="btn-primary" onclick="trackOrder()">Track <i class="fas fa-arrow-right"></i></button>
+    </div>
+    <div class="tracking-result" id="tracking-result" style="display:none">
+      <div class="order-info-card" id="order-info-card"></div>
+      <div class="tracking-steps" id="tracking-steps"></div>
+      <div id="map" class="map-container"></div>
+    </div>
+  </section>
+</main>
+
+<!-- ===== ADMIN PAGE ===== -->
+<main class="page" id="page-admin">
+  <div class="admin-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="admin-sidebar">
+      <div class="admin-logo">
+        <span>🛍️</span> QUICK SHOP
+      </div>
+      <nav class="admin-nav">
+        <button class="admin-nav-btn active" data-tab="dashboard"><i class="fas fa-chart-pie"></i> Dashboard</button>
+        <button class="admin-nav-btn" data-tab="products"><i class="fas fa-box"></i> Products</button>
+        <button class="admin-nav-btn" data-tab="customers"><i class="fas fa-users"></i> Customers</button>
+        <button class="admin-nav-btn" data-tab="orders"><i class="fas fa-receipt"></i> Orders</button>
+        <button class="admin-nav-btn" data-tab="categories"><i class="fas fa-tags"></i> Categories</button>
+      </nav>
+      <div class="admin-sidebar-footer">
+        <div class="admin-avatar">A</div>
+        <div>
+          <div class="admin-name">Admin User</div>
+          <div class="admin-role">Super Admin</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="admin-main">
+
+      <!-- DASHBOARD TAB -->
+      <div class="admin-tab active" id="tab-dashboard">
+        <div class="admin-page-header">
+          <h1>Dashboard</h1>
+          <span class="date-badge" id="admin-date"></span>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card stat-blue">
+            <div class="stat-icon"><i class="fas fa-box"></i></div>
+            <div class="stat-info">
+              <div class="stat-num" id="stat-products">0</div>
+              <div class="stat-label">Total Products</div>
+            </div>
+            <div class="stat-trend">+12%</div>
+          </div>
+          <div class="stat-card stat-green">
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+            <div class="stat-info">
+              <div class="stat-num" id="stat-customers">0</div>
+              <div class="stat-label">Customers</div>
+            </div>
+            <div class="stat-trend">+8%</div>
+          </div>
+          <div class="stat-card stat-orange">
+            <div class="stat-icon"><i class="fas fa-receipt"></i></div>
+            <div class="stat-info">
+              <div class="stat-num" id="stat-orders">0</div>
+              <div class="stat-label">Orders</div>
+            </div>
+            <div class="stat-trend">+23%</div>
+          </div>
+          <div class="stat-card stat-purple">
+            <div class="stat-icon"><i class="fas fa-rupee-sign"></i></div>
+            <div class="stat-info">
+              <div class="stat-num" id="stat-revenue">₹0</div>
+              <div class="stat-label">Revenue</div>
+            </div>
+            <div class="stat-trend">+18%</div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="dash-card">
+            <h3>Recent Orders</h3>
+            <table class="admin-table" id="recent-orders-table">
+              <thead><tr><th>Order ID</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead>
+              <tbody id="recent-orders-body"></tbody>
+            </table>
+          </div>
+          <div class="dash-card">
+            <h3>Top Products</h3>
+            <div id="top-products-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRODUCTS TAB -->
+      <div class="admin-tab" id="tab-products">
+        <div class="admin-page-header">
+          <h1>Products</h1>
+          <button class="btn-primary" onclick="openProductModal()"><i class="fas fa-plus"></i> Add Product</button>
+        </div>
+        <div class="search-bar-admin">
+          <input type="text" placeholder="Search products..." id="admin-product-search" oninput="renderAdminProducts()"/>
+        </div>
+        <table class="admin-table full-table">
+          <thead>
+            <tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="admin-products-body"></tbody>
+        </table>
+      </div>
+
+      <!-- CUSTOMERS TAB -->
+      <div class="admin-tab" id="tab-customers">
+        <div class="admin-page-header">
+          <h1>Customers</h1>
+          <button class="btn-primary" onclick="openCustomerModal()"><i class="fas fa-plus"></i> Add Customer</button>
+        </div>
+        <table class="admin-table full-table">
+          <thead>
+            <tr><th>Name</th><th>Email</th><th>Phone</th><th>Orders</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="admin-customers-body"></tbody>
+        </table>
+      </div>
+
+      <!-- ORDERS TAB -->
+      <div class="admin-tab" id="tab-orders">
+        <div class="admin-page-header">
+          <h1>Orders</h1>
+        </div>
+        <table class="admin-table full-table">
+          <thead>
+            <tr><th>Order ID</th><th>Customer</th><th>Products</th><th>Total</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="admin-orders-body"></tbody>
+        </table>
+      </div>
+
+      <!-- CATEGORIES TAB -->
+      <div class="admin-tab" id="tab-categories">
+        <div class="admin-page-header">
+          <h1>Categories</h1>
+          <button class="btn-primary" onclick="openCategoryModal()"><i class="fas fa-plus"></i> Add Category</button>
+        </div>
+        <div class="categories-admin-grid" id="categories-admin-grid"></div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-overlay">
+
+  <!-- PRODUCT MODAL -->
+  <div class="modal" id="product-modal">
+    <div class="modal-header">
+      <h2 id="product-modal-title">Add Product</h2>
+      <button onclick="closeModal('product-modal')" class="modal-close"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-product-id"/>
+      <div class="form-group">
+        <label>Product Name</label>
+        <input type="text" id="p-name" placeholder="e.g. Premium Headphones"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Price (₹)</label>
+          <input type="number" id="p-price" placeholder="999"/>
+        </div>
+        <div class="form-group">
+          <label>Stock</label>
+          <input type="number" id="p-stock" placeholder="50"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="p-category"></select>
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="p-desc" placeholder="Product description..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Image Emoji / Icon</label>
+        <input type="text" id="p-image" placeholder="e.g. 🎧"/>
+      </div>
+      <div class="form-group">
+        <label>Rating (1-5)</label>
+        <input type="number" id="p-rating" min="1" max="5" step="0.1" placeholder="4.5"/>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('product-modal')">Cancel</button>
+      <button class="btn-primary" onclick="saveProduct()">Save Product</button>
+    </div>
+  </div>
+
+  <!-- CUSTOMER MODAL -->
+  <div class="modal" id="customer-modal">
+    <div class="modal-header">
+      <h2 id="customer-modal-title">Add Customer</h2>
+      <button onclick="closeModal('customer-modal')" class="modal-close"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-customer-id"/>
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="c-name" placeholder="John Doe"/>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="c-email" placeholder="john@example.com"/>
+      </div>
+      <div class="form-group">
+        <label>Phone</label>
+        <input type="tel" id="c-phone" placeholder="+91 98765 43210"/>
+      </div>
+      <div class="form-group">
+        <label>Address</label>
+        <textarea id="c-address" placeholder="Full delivery address..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('customer-modal')">Cancel</button>
+      <button class="btn-primary" onclick="saveCustomer()">Save Customer</button>
+    </div>
+  </div>
+
+  <!-- CATEGORY MODAL -->
+  <div class="modal" id="category-modal">
+    <div class="modal-header">
+      <h2>Add Category</h2>
+      <button onclick="closeModal('category-modal')" class="modal-close"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Category Name</label>
+        <input type="text" id="cat-name" placeholder="e.g. Electronics"/>
+      </div>
+      <div class="form-group">
+        <label>Icon (Emoji)</label>
+        <input type="text" id="cat-icon" placeholder="e.g. 📱"/>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('category-modal')">Cancel</button>
+      <button class="btn-primary" onclick="saveCategory()">Save Category</button>
+    </div>
+  </div>
+
+  <!-- PRODUCT DETAIL MODAL -->
+  <div class="modal modal-lg" id="product-detail-modal">
+    <div class="modal-header">
+      <h2>Product Details</h2>
+      <button onclick="closeModal('product-detail-modal')" class="modal-close"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" id="product-detail-body"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="downloadProductDetail()"><i class="fas fa-download"></i> Download Details</button>
+      <button class="btn-primary" id="modal-add-cart-btn">Add to Cart</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- SCRIPTS -->
+<script src="db.js"></script>
+<script src="notifications.js"></script>
+<script src="cart.js"></script>
+<script src="products.js"></script>
+<script src="admin.js"></script>
+<script src="tracking.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
